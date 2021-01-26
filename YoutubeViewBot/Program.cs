@@ -14,6 +14,7 @@ namespace YoutubeViewBot
     {
         static string id;
         static int threadsCount;
+        static string ChannelVedioURL;
 
         static int pos = 0;
 
@@ -47,6 +48,7 @@ namespace YoutubeViewBot
         static void Main(string[] args)
         {
             id = dialog("Enter Video ID");
+            ChannelVedioURL = $"https://www.youtube.com/channel/{id}/videos";
             threadsCount = Convert.ToInt32(dialog("Enter Threads Count"));
 
             while (true)
@@ -157,7 +159,7 @@ namespace YoutubeViewBot
 
                         //youtubeScrapper = new YoutubeScrapper(seleniumproxy);
                     youtubeScrapper = new YoutubeScrapper();
-                    youtubeScrapper.StartBot("https://www.youtube.com/channel/UCqmkfWNpOAKaShCeLX7HNZg/videos");
+                    youtubeScrapper.StartBot(ChannelVedioURL);
 
                         youtubeScrapper.TearDown();
                     //}
