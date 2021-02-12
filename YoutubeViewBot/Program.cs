@@ -6,6 +6,9 @@ using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using YoutubeViewBot.Helpers;
 using Proxy = YoutubeViewBot.Helpers.Proxy;
+using YoutubeViewBot.Models;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace YoutubeViewBot
 {
@@ -35,7 +38,8 @@ namespace YoutubeViewBot
             "https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
             "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt",
             "https://api.proxyscrape.com/?request=getproxies&proxytype=socks4&timeout=9000&ssl=yes",
-            "https://www.proxy-list.download/api/v1/get?type=socks4"
+            "https://www.proxy-list.download/api/v1/get?type=socks4",
+            "https://www.proxyscan.io/download?type=https"
         };
 
 
@@ -47,6 +51,13 @@ namespace YoutubeViewBot
         [STAThread]
         static void Main(string[] args)
         {
+
+            ScrapPublicProxy scrapPublicProxy = new ScrapPublicProxy();
+
+            scrapPublicProxy.ScrapHTTPProxy();
+            scrapPublicProxy.TearDown();
+
+
             id = dialog("Enter Video ID");
             ChannelVedioURL = $"https://www.youtube.com/channel/{id}/videos";
             threadsCount = Convert.ToInt32(dialog("Enter Threads Count"));
@@ -122,6 +133,7 @@ namespace YoutubeViewBot
 
             try
             {
+                Console.WriteLine(address);
                 PingReply reply = ping.Send(address, 2000);
                 if (reply == null) return false;
 
@@ -148,22 +160,30 @@ namespace YoutubeViewBot
 
 
 
-                    ////if(CanPing(proxy.Address))
-                    ////{
+                    //if (CanPing(proxy.Address))
+                    //{
 
-                    //var seleniumproxy = new OpenQA.Selenium.Proxy();
-                    //    seleniumproxy.Kind = ProxyKind.Manual;
-                    //    seleniumproxy.IsAutoDetect = false;
-                    //    seleniumproxy.HttpProxy = proxy.Address;
-                    //    seleniumproxy.SslProxy = proxy.Address;
+                    List<ProxyDetail> proxylist = null;
+
+                    using (ProxyDBContext _context=new ProxyDBContext())
+                    {
+                        proxylist = _context.ProxyDetails.Where(x => !(x.IpAddress.Equals(string.Empty))).ToList();
+                    }
+
+                    foreach (var proxyitem in proxylist)
+                    {
+                        YoutubeScrapper.ProxyAddress = proxyitem.IpAddress;
 
                         //youtubeScrapper = new YoutubeScrapper(seleniumproxy);
-                    youtubeScrapper = new YoutubeScrapper();
-                    youtubeScrapper.StartBot(ChannelVedioURL);
+                        youtubeScrapper = new YoutubeScrapper();
+
+                        youtubeScrapper.StartBot(ChannelVedioURL);
 
                         youtubeScrapper.TearDown();
+                    }
+                    // UCqmkfWNpOAKaShCeLX7HNZg
                     //}
-                    
+
 
                 }
                 catch (Exception ex)
